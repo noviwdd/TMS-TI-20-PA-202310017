@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ibik.ledent.ledent.student.dto.ResponseData;
+import com.ibik.ledent.ledent.dto.ResponseData;
 
 @RestController
 @RequestMapping("/api/student")
@@ -29,12 +29,10 @@ public class StudentController {
     private StudentServices studentServices;
 
     @PostMapping
-    // public Student posPrograms (@Valid @RequestBody Student student, Errors errors) { 
-    public ResponseEntity<ResponseData<Student>> posPrograms(@Valid @RequestBody Student student, Errors errors) {
+    public ResponseEntity<ResponseData<Student>> postStudent(@Valid @RequestBody Student student, Errors errors) {
         ResponseData<Student> responseData = new ResponseData<>();
         if (errors.hasErrors()) {
             for (ObjectError error : errors.getAllErrors()) {
-                // System.out.println(error.getDefaultMessage());
                 responseData.getMessage().add(error.getDefaultMessage());
             }
 
@@ -42,42 +40,87 @@ public class StudentController {
             responseData.setData(null);
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-
-            // throw new RuntimeException("Validation Error");
         }
 
         responseData.setResult(true);
         List<Student> value = new ArrayList<>();
         value.add(studentServices.save(student));
-        responseData.setData(student);
+        responseData.setData(value);
         return ResponseEntity.ok(responseData);
-        // return studentServices.save(student);
     }
 
     @GetMapping
-    public Iterable<Student> fetchProgram() {
-        return studentServices.findAll();
+    public ResponseEntity<ResponseData<Student>> fetchStudent() {
+        ResponseData<Student> responseData = new ResponseData<>();
+
+        try {
+            responseData.setResult(true);
+            List<Student> value = (List<Student>) studentServices.findAll();
+            responseData.setData(value);
+            return ResponseEntity.ok(responseData);
+        } catch (Exception e) {
+            responseData.setResult(false);
+            responseData.getMessage().add(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseData);
+        }
     }
 
     @GetMapping("/{id}")
-    public Student fetchProgramById(@PathVariable("id") int id) {
-        return studentServices.findOne(id);
+    public ResponseEntity<ResponseData<Student>> fetchStudentById(@PathVariable("id") int id) {
+        ResponseData<Student> responseData = new ResponseData<>();
+
+        try {
+            responseData.setResult(true);
+            List<Student> value = new ArrayList<>();
+            value.add(studentServices.findOne(id));
+            responseData.setData(value);
+            return ResponseEntity.ok(responseData);
+        } catch (Exception e) {
+            responseData.setResult(false);
+            responseData.getMessage().add(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+        }
     }
 
     @PutMapping
-    public Student updateProgram(@Valid @RequestBody Student student, Errors errors) {
-        if(errors.hasErrors()) {
-            for(ObjectError error : errors.getAllErrors()) {
-                System.out.println(error.getDefaultMessage());
-            }
+    public ResponseEntity<ResponseData<Student>> updateStudent(@Valid @RequestBody Student student, Errors errors) {
+        ResponseData<Student> responseData = new ResponseData<>();
 
-            throw new RuntimeException("Validation Error");
+        if(student.getId() != 0) {
+            if(errors.hasErrors()) {
+                for(ObjectError error : errors.getAllErrors()) {
+                    responseData.getMessage().add(error.getDefaultMessage());
+                }
+                responseData.setResult(false);
+                responseData.setData(null);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+            }
+            responseData.setResult(true);
+            List<Student> value = new ArrayList<>();
+            value.add(studentServices.save(student));
+            responseData.setData(value);
+            return ResponseEntity.ok(responseData);
+        } else {
+            responseData.setResult(false);
+            responseData.getMessage().add("ID is required");
+            responseData.setData(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
         }
-        return studentServices.save(student);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProgramById(@PathVariable("id") int id) {
-        studentServices.removeOne(id);
+    public ResponseEntity<ResponseData<Void>> deleteStudentById(@PathVariable("id") int id) {
+        ResponseData<Void> responseData = new ResponseData<>();
+
+        try {
+            studentServices.removeOne(id);
+            responseData.setResult(true);
+            responseData.getMessage().add("Successfully Remove");
+            return ResponseEntity.ok(responseData);
+        } catch (Exception e) {
+            responseData.setResult(false);
+            responseData.getMessage().add(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+        }
     }
 }
