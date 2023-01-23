@@ -9,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name="programstudy")
@@ -19,21 +21,26 @@ public class ProgramStudy implements Serializable {
     private int id;
 
     @Column(length = 50)
+    @NotEmpty(message = "Name is required")
     private String name;
 
     @Column(length = 20)
     private String description;
 
     @Column(length = 5)
+    @Min(value = 1, message = "Code is required")
     private String code;
 
     @Column(length = 11)
+    @Min(value = 1, message = "Program Id is required")
     private int program_id;
 
     @Column(length = 11)
+    @Min(value = 1, message = "Faculty Id is required")
     private int faculty_id;
 
     @Column(length = 11)
+    @Min(value = 1, message = "Department Id is required")
     private int department_id;
 
     @Column(nullable = false, columnDefinition = "TINYINT(4)")
