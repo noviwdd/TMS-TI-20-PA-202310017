@@ -25,7 +25,7 @@ public class Program implements Serializable {
     @NotEmpty(message = "Name is required")
     private String name;
 
-    @Column(length = 20)
+    @Column(length = 100)
     private String description;
 
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
@@ -57,7 +57,7 @@ public class Program implements Serializable {
         this.name = name;
     }
 
-    public String description() {
+    public String getDescription() {
         return description;
     }
 
